@@ -10,6 +10,27 @@ services:
             - ./logs:/app/logs
             - ./requirements:/app/requirements
             - ./scripts:/app/scripts
+        networks: [ app-net ]
         ports:
             # Jupyter port
             - "8888:8888"
+        environment:
+            JUPYTER_TOKEN: password
+
+    minio:
+        image: minio/minio:latest
+        # Within container, expose the API at container-host:9000 and UI at container-host:9001
+        command: ["server", "--address", ":9000", "--console-address", ":9001", "/data"]
+        volumes:
+            - ./data/minio:/data
+        networks: [ app-net ]
+        ports:
+            # 9002 locally -> 9000 in container
+            - "9002:9000" # API port
+            # 9001 locally -> 9001 in container
+            - "9001:9001" # UI port
+        environment:
+            MINIO_ROOT_USER: admin
+            MINIO_ROOT_PASSWORD: password
+networks:
+    app-net: {}
